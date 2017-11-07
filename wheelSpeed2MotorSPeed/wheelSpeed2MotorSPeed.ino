@@ -6,8 +6,8 @@ elapsedMillis timeElapsed;
 
 
 
-Encoder wheelEnc(18, 19);
-Encoder motor2Enc(2, 3);
+Encoder wheelEnc(2, 3);
+Encoder motor2Enc(18, 19);
 Adafruit_MotorShield AFMS = Adafruit_MotorShield();
 Adafruit_StepperMotor *myStepper2 = AFMS.getStepper(200, 2);
 
@@ -34,19 +34,13 @@ void setup() {
   stepper2.move(10000);
 }
 
-long lastMotor2Pos = stepper2.currentPosition();
-unsigned long lastStepTime = micros();
-int sampleInterval = 20;  //sampling rate in ms
+int sampleInterval = 5;  //sampling rate in ms
 int encoderPositionsPerTurn = 8192;
 const double motorStepsPerTurn = 200;
-float wheelCircumference = 62.83; // 20cm * pi
-float cmPerEncoderTick = wheelCircumference / encoderPositionsPerTurn;
+double wheelCircumference = 62.83; // 20cm * pi
 long oldWheelPosition  = -999;
 long oldMotor2Position = -999;
 float samplesPerSecond = 1000 / sampleInterval;
-float samplesPerMinute = samplesPerSecond * 60;
-float cmPerMotorTick = wheelCircumference / motorStepsPerTurn;
-long microsElapsed = micros();
 
 void loop() {
   long newWheelPosition = wheelEnc.read();

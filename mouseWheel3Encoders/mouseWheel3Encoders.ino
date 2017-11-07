@@ -1,15 +1,18 @@
+////////////////sets the stepper speed based on the SPEED of the encoder///////////////////////
+////////////////we're using a MEGA for its the extra interrupts.////////////////////////////
+
+
 #include <Encoder.h>
 #include <elapsedMillis.h>
 #include <AccelStepper.h>
-#include <Adafruit_MotorShield.h>
+#include <Adafruit_MotorShield.h>   // We're using the adafruit motor shield to drive the steppers https://www.adafruit.com/product/1438
 elapsedMillis timeElapsed;
-
-
 
 Encoder wheelEnc(2, 3);
 Encoder motor2Enc(19, 18);
+
 Adafruit_MotorShield AFMS = Adafruit_MotorShield();
-Adafruit_StepperMotor *myStepper2 = AFMS.getStepper(200, 1);
+Adafruit_StepperMotor *myStepper2 = AFMS.getStepper(200, 2);
 
 // wrappers for the second motor!
 void forwardstep2() {  
