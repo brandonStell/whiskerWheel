@@ -6,8 +6,8 @@ elapsedMillis timeElapsed;
 
 
 
-Encoder wheelEnc(2, 3);
-Encoder motor2Enc(18, 19);
+Encoder wheelEnc(3, 2);
+Encoder motor2Enc(18, 17);
 Adafruit_MotorShield AFMS = Adafruit_MotorShield();
 Adafruit_StepperMotor *myStepper2 = AFMS.getStepper(200, 2);
 
@@ -31,39 +31,60 @@ void setup() {
 
   stepper2.setMaxSpeed(1000.0);  // steps per second
   stepper2.setAcceleration(1000.0);
-  stepper2.move(10000);
+//  stepper2.move(10000);
 }
 
 int sampleInterval = 5;  //sampling rate in ms
-int encoderPositionsPerTurn = 8192;
+double encoderPositionsPerTurn = 8192;
 const double motorStepsPerTurn = 200;
-double wheelCircumference = 62.83; // 20cm * pi
 long oldWheelPosition  = -999;
 long oldMotor2Position = -999;
-float samplesPerSecond = 1000 / sampleInterval;
+double samplesPerSecond = 1000 / sampleInterval;
 
 void loop() {
   long newWheelPosition = wheelEnc.read();
   long newMotor2Position = motor2Enc.read();
   if(timeElapsed > sampleInterval){
-    int lastWheelEncoderMove = oldWheelPosition - newWheelPosition;
+    double lastWheelEncoderMove = oldWheelPosition - newWheelPosition;
     double motorStepsPerSecond = (motorStepsPerTurn * lastWheelEncoderMove * samplesPerSecond / encoderPositionsPerTurn);    // RPM
     if(motorStepsPerSecond == 0){
       stepper2.moveTo(stepper2.currentPosition());
       myStepper2->release();
     }
-    else if (motorStepsPerSecond > 0){
+    else if (motorStepsPerSecond > 0 && motorStepsPerSecond < 200){
+      stepper2.setSpeed(motorStepsPerSecond);// steps per second
       stepper2.move(10000);
     }
-    else if (motorStepsPerSecond < 0){
+    else if (motorStepsPerSecond < 0 && motorStepsPerSecond > -200){
+      stepper2.setSpeed(motorStepsPerSecond);// steps per second
       stepper2.move(-10000);
     }
     Serial.print(newWheelPosition);
     Serial.print(" ");
     Serial.println(newMotor2Position);
-    stepper2.setSpeed(motorStepsPerSecond);// steps per second
+//    Serial.print(" ");
+//    Serial.println(lastWheelEncoderMove/ encoderPositionsPerTurn * samplesPerSecond * 62.83);
     oldWheelPosition = newWheelPosition;
     timeElapsed = 0;
   }
-  stepper2.run();
+  while (newWheelPosition > newMotor2Position+80){
+    stepper2.run();
+    Serial.print(newWheelPosition);
+    Serial.print(" ");
+    Serial.println(newMotor2Position);
+//    Serial.print(" ");
+//    Serial.println("---");
+    newWheelPosition = wheelEnc.read();
+    newMotor2Position = motor2Enc.read();
+  }
+  while (newWheelPosition < newMotor2Position-80){
+    stepper2.run();
+    Serial.print(newWheelPosition);
+    Serial.print(" ");
+    Serial.println(newMotor2Position);
+//    Serial.print(" ");
+//    Serial.println(" ---");
+    newWheelPosition = wheelEnc.read();
+    newMotor2Position = motor2Enc.read();
+  }
 }
